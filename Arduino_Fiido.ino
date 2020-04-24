@@ -297,7 +297,7 @@ void setup() {
 		if (cnf.habilitar_consola) {
 			Serial.begin(19200);
 			while (!Serial) {};
-			Serial.print("Con_Acelerador_DAC_Millis_ProgNL_6kmh ");
+			Serial.print("Arduino E-Bike ");
 			Serial.println(version);
 		}
 
