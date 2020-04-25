@@ -317,6 +317,8 @@ void setup() {
 			fac_a = 1.0 - pow (1.0, fac_c) * fac_b;
 		}
 
+		// Estabiliza imanes.
+		cnf.activa_pedaleo = constrain(cnf.activa_pedaleo, 1, 6);
 		// Estabiliza suavidad de los progresivos.
 		cnf.suavidad_progresivos = constrain(cnf.suavidad_progresivos, 1, 10);
 		// Estabiliza suavidad de los auto_progresivos.
