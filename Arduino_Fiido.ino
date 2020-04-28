@@ -367,13 +367,13 @@ void loop() {
 			// Lanzamos auto_progresivo.
 			auto_progresivo = true;
 
-			if (contador_retardo_aceleracion > 4) {
+			if (contador_retardo_aceleracion > 2) {
 				bkp_contador_retardo_aceleracion = contador_retardo_aceleracion;
 			}
 
 			// Desacelera al parar los pedales.
 			if (contador_retardo_aceleracion > 0 && cnf.desacelera_al_parar_pedal) {
-				contador_retardo_aceleracion = contador_retardo_aceleracion - 2;
+				contador_retardo_aceleracion = contador_retardo_aceleracion - 1;
 				nivel_aceleracion = calculaAceleradorProgresivoNoLineal();
 
 				// Calculamos el nivel de aceleración.
