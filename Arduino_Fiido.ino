@@ -55,8 +55,6 @@ boolean auto_progresivo = false;
 
 // Progresivos.
 const float fac_p = 1.056 - 0.056 * cnf.suavidad_progresivos;
-// Aviso de final de progresivo.
-boolean aviso = true;
 // Variables para auto_progresivos.
 float fac_b = 0.0;
 float fac_a = 0.0;
@@ -162,8 +160,6 @@ void frenar() {
 		contador_retardo_inicio_progresivo = cnf.retardo_inicio_progresivo;
 		contador_retardo_aceleracion = 0;
 		bkp_contador_retardo_aceleracion = 0;
-		// Control del flag para el aviso sonoro del progresivo.
-		aviso = true;
 	}
 }
 
@@ -424,12 +420,6 @@ void loop() {
 		// Si el botón está pulsado.
 		if (cnf.pulsador && boton == 0) {
 			nivel_aceleracion = a0_valor_6kmh;
-		}
-
-		if (contador_retardo_aceleracion == cnf.retardo_aceleracion && aviso) {
-			// Tono de Final de progresivo.
-			repeatTones(pin_piezo, cnf.buzzer_activo, 1, 3000, 190, 1);
-			aviso = false;
 		}
 
 		// Fijamos el acelerador si el valor anterior es distinto al actual.
