@@ -47,19 +47,10 @@ const int a0_valor_minimo = 329;
 const int a0_valor_6kmh = 440;
 const int a0_valor_limite = 842;
 
-// Contadores de paro, aceleración y auto_progresivo.
+// Variable para cálculos.
 int contador_retardo_aceleracion = 0;
-unsigned long contador_retardo_inicio_progresivo = 0;
-int bkp_contador_retardo_aceleracion = 0;
-boolean auto_progresivo = false;
-
-// Progresivos.
+// Suavidad de los progresivos.
 const float fac_p = 1.056 - 0.056 * cnf.suavidad_progresivos;
-// Variables para auto_progresivos.
-float fac_b = 0.0;
-float fac_a = 0.0;
-const float fac_c = cnf.suavidad_autoprogresivos / 10.0;
-
 // Almacena el último valor asignado al DAC.
 int nivel_aceleracion_prev = a0_valor_reposo;
 // Valor recogido del acelerador.
@@ -156,10 +147,7 @@ void frenar() {
 	// Comprobación para evitar lecturas fantasmas.
 	if (digitalRead(pin_freno) == LOW) {
 		a_frenadas++;
-		// Reiniciamos contadores.
-		contador_retardo_inicio_progresivo = cnf.retardo_inicio_progresivo;
 		contador_retardo_aceleracion = 0;
-		bkp_contador_retardo_aceleracion = 0;
 	}
 }
 
@@ -302,23 +290,10 @@ void setup() {
 
 		// Ajusta configuración.
 		cnf.retardo_aceleracion = cnf.retardo_aceleracion * (1000 / cnf.tiempo_act);
-		cnf.retardo_inicio_progresivo = cnf.retardo_inicio_progresivo * (1000 / cnf.tiempo_act);
-
-		// Anulamos el retardo por seguridad para que empiece progresivo al encender la bici.
-		contador_retardo_inicio_progresivo = cnf.retardo_inicio_progresivo;
-
-		// Cálculo de factores para auto_progresivo.
-		if (cnf.retardo_inicio_progresivo > 0) {
-			fac_b = (1.0 / cnf.retardo_aceleracion - 1.0) / (pow ((cnf.retardo_inicio_progresivo - 1.0), fac_c) - pow (1.0, fac_c));
-			fac_a = 1.0 - pow (1.0, fac_c) * fac_b;
-		}
-
 		// Estabiliza imanes.
 		cnf.activa_pedaleo = constrain(cnf.activa_pedaleo, 1, 6);
 		// Estabiliza suavidad de los progresivos.
 		cnf.suavidad_progresivos = constrain(cnf.suavidad_progresivos, 1, 10);
-		// Estabiliza suavidad de los auto_progresivos.
-		cnf.suavidad_autoprogresivos = constrain(cnf.suavidad_autoprogresivos, 1, 10);
 		// Tono de finalización configuración del sistema.
 		repeatTones(pin_piezo, cnf.buzzer_activo, 3, 3000, 90, 90);
 	} else {
@@ -357,16 +332,6 @@ void loop() {
 
 		// Si no se pedalea.
 		if (!pedaleo) {
-			if (actualizacion_contadores)
-				contador_retardo_inicio_progresivo++;
-	
-			// Lanzamos auto_progresivo.
-			auto_progresivo = true;
-
-			if (contador_retardo_aceleracion > 2) {
-				bkp_contador_retardo_aceleracion = contador_retardo_aceleracion;
-			}
-
 			// Desacelera al parar los pedales.
 			if (contador_retardo_aceleracion > 0 && cnf.desacelera_al_parar_pedal) {
 				contador_retardo_aceleracion = contador_retardo_aceleracion - 1;
@@ -388,19 +353,6 @@ void loop() {
 				anulaCruceroAcelerador();
 		// Si se pedalea.
 		} else {
-			if (auto_progresivo && contador_retardo_inicio_progresivo < cnf.retardo_inicio_progresivo) {
-				if (bkp_contador_retardo_aceleracion > cnf.retardo_aceleracion) {
-					bkp_contador_retardo_aceleracion = cnf.retardo_aceleracion;
-				}
-
-				contador_retardo_aceleracion = (int) freno * bkp_contador_retardo_aceleracion * (fac_a + fac_b * pow (contador_retardo_inicio_progresivo, fac_c)) * v_crucero / a0_valor_limite;
-			}
-
-			// Quitamos auto_progresivo.
-			auto_progresivo = false;
-			// Reiniciamos contador.
-			contador_retardo_inicio_progresivo = 0;
-
 			if (actualizacion_contadores && contador_retardo_aceleracion < cnf.retardo_aceleracion) {
 				contador_retardo_aceleracion++;
 			}

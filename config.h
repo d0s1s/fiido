@@ -39,17 +39,9 @@ struct ConfigContainer {
 	// Retardo en segundos para ponerse a velocidad máxima o crucero.
 	int retardo_aceleracion = 5;
 
-	// Retardo para inciar progresivo tras parar pedales.
-	// Freno anula el tiempo.
-	unsigned long retardo_inicio_progresivo = 10;
-
 	// Suavidad de los progresivos, varía entre 1-10.
 	// Al crecer se hacen más bruscos.
 	int suavidad_progresivos = 1;
-
-	// Suavidad de los autoprogresivos, varía entre 1-10.
-	// Al crecer se hacen más bruscos.
-	int suavidad_autoprogresivos = 1;
 
 	// -------------- DEBUG
 
