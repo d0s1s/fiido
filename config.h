@@ -36,7 +36,11 @@ struct ConfigContainer {
 
 	// True si se desea activar la posibilidad de acelerar desde
 	// parado a 6 km/h pulsando el botón del pito.
-	boolean pulsador = false;
+	boolean asistencia_pulsador = false;
+	
+	// True si se desea activar la posibilidad de acelerar desde
+	// parado a 6 km/h accionando el acelerador.
+	boolean asistencia_acelerador = false;
 
 	// -------------- PROGRESIVOS
   

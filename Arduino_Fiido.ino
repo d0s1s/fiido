@@ -334,20 +334,25 @@ void loop() {
 
 		// Si no se pedalea.
 		if (!pedaleo) {
-			// Desacelera al parar los pedales.
-			if (contador_retardo_aceleracion > 0 && cnf.desacelera_al_parar_pedal) {
-				contador_retardo_aceleracion = contador_retardo_aceleracion - cnf.rampa_desaceleracion;
-				nivel_aceleracion = calculaAceleradorProgresivoNoLineal();
+			// Asistencia 6 Km/h con acelerador.
+			if (modo_acelerador && cnf.asistencia_acelerador && v_acelerador > a0_valor_minimo) {
+				nivel_aceleracion = a0_valor_6kmh;
+			} else {
+				// Desacelera al parar los pedales.
+				if (contador_retardo_aceleracion > 0 && cnf.desacelera_al_parar_pedal) {
+					contador_retardo_aceleracion = contador_retardo_aceleracion - cnf.rampa_desaceleracion;
+					nivel_aceleracion = calculaAceleradorProgresivoNoLineal();
 
-				// Calculamos el nivel de aceleración.
-				nivel_aceleracion = calculaAceleradorProgresivoNoLineal();
+					// Calculamos el nivel de aceleración.
+					nivel_aceleracion = calculaAceleradorProgresivoNoLineal();
 
-				if (contador_retardo_aceleracion < 0) {
+					if (contador_retardo_aceleracion < 0) {
+						contador_retardo_aceleracion = 0;
+					}
+				} else {
+					// Reiniciamos contador.
 					contador_retardo_aceleracion = 0;
 				}
-			} else {
-				// Reiniciamos contador.
-				contador_retardo_aceleracion = 0;
 			}
 
 			// Anula crucero con acelerador sin pedalear.
@@ -372,7 +377,7 @@ void loop() {
 		}
 
 		// Si el botón está pulsado.
-		if (cnf.pulsador && boton == 0) {
+		if (cnf.asistencia_pulsador && boton == 0) {
 			nivel_aceleracion = a0_valor_6kmh;
 		}
 
