@@ -85,8 +85,9 @@ PROGRESIVOS:
  * fijada.
 ------------------------------------------------------------------------
 ASISTENCIA A 6 KM/H DESDE PARADO:
- * Se puede accionar este modo mientras el botón esté accionado --> se
- * asiste a 6 km/h, ajustándose a la normativa si se usa sin pedalear.
+ * Se puede accionar este modo mientras el botón esté accionado o
+ * accionando el acelerador --> se asiste a 6 km/h, ajustándose a la
+ * normativa si se usa sin pedalear.
  * 
  * Por defecto viene deshabilitado, hay que activarlo en el config antes
  * de compilar el programa.

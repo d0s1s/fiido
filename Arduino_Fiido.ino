@@ -48,7 +48,7 @@ const int a0_valor_6kmh = 440;
 const int a0_valor_limite = 842;
 
 // Variable para cálculos.
-float contador_retardo_aceleracion = 0;
+int contador_retardo_aceleracion = 0;
 // Suavidad de los progresivos.
 const float fac_p = 1.056 - 0.056 * cnf.suavidad_progresivos;
 // Almacena el último valor asignado al DAC.
@@ -295,7 +295,7 @@ void setup() {
 		// Estabiliza suavidad de los progresivos.
 		cnf.suavidad_progresivos = constrain(cnf.suavidad_progresivos, 1, 10);
 		// Estabiliza rampa de desaceleración.
-		cnf.rampa_desaceleracion = constrain(cnf.rampa_desaceleracion, 0.50, 2.00);
+		cnf.rampa_desaceleracion = constrain(cnf.rampa_desaceleracion, 1, 2);
 		// Tono de finalización configuración del sistema.
 		repeatTones(pin_piezo, cnf.buzzer_activo, 3, 3000, 90, 90);
 	} else {
