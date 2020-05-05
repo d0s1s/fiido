@@ -14,17 +14,17 @@ struct ConfigContainer {
 	// -------------- PEDALEO
 
 	// Tiempo en ms para detectar la desactivación del pedaleo.
-	unsigned long tiempo_act = 850;
+	unsigned long tiempo_act = 750;
 
 	// Número de imán a la que activamos pedaleo.
-	int activa_pedaleo = 2;
+	byte activa_pedaleo = 2;
 
 	// Desacelera al parar los pedales.
 	boolean desacelera_al_parar_pedal = true;
 
-	// Rampa de desaceleración al parar los pedales. Valores: 1 ó 2.
+	// Rampa de desaceleración al parar los pedales.
 	// A mayor número, más rápido desacelera.
-	byte rampa_desaceleracion = 1;
+	float rampa_desaceleracion = 0.50;
 
 	// -------------- TONOS
 
@@ -41,11 +41,11 @@ struct ConfigContainer {
 	// -------------- PROGRESIVOS
   
 	// Retardo en segundos para ponerse a velocidad máxima o crucero.
-	int retardo_aceleracion = 5;
+	byte retardo_aceleracion = 5;
 
 	// Suavidad de los progresivos, varía entre 1-10.
 	// Al crecer se hacen más bruscos.
-	int suavidad_progresivos = 1;
+	byte suavidad_progresivos = 1;
 
 	// -------------- DEBUG
 
