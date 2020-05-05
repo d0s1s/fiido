@@ -294,6 +294,8 @@ void setup() {
 		cnf.activa_pedaleo = constrain(cnf.activa_pedaleo, 1, 6);
 		// Estabiliza suavidad de los progresivos.
 		cnf.suavidad_progresivos = constrain(cnf.suavidad_progresivos, 1, 10);
+		// Estabiliza rampa de desaceleración.
+		cnf.rampa_desaceleracion = constrain(cnf.rampa_desaceleracion, 1, 2);
 		// Tono de finalización configuración del sistema.
 		repeatTones(pin_piezo, cnf.buzzer_activo, 3, 3000, 90, 90);
 	} else {
