@@ -334,7 +334,7 @@ void loop() {
 		if (!pedaleo) {
 			// Desacelera al parar los pedales.
 			if (contador_retardo_aceleracion > 0 && cnf.desacelera_al_parar_pedal) {
-				contador_retardo_aceleracion = contador_retardo_aceleracion - 1;
+				contador_retardo_aceleracion = contador_retardo_aceleracion - cnf.rampa_desaceleracion;
 				nivel_aceleracion = calculaAceleradorProgresivoNoLineal();
 
 				// Calculamos el nivel de aceleración.
