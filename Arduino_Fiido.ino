@@ -144,7 +144,7 @@ void pedal() {
 		a_pulsos = 0;
 	} else {
 		// Si Rising tarda mucho.
-		if (pas_factor > 1500) {
+		if (pas_factor > 1000) {
 			if (cnf.activa_pedaleo == 1) {
 				a_pulsos = -1;
 			} else {
