@@ -4,7 +4,7 @@
 #include "Tones.h"
 #include "config.h"
 
-const char* version = "Arduino Fiido 3.0";
+const char* version = "Arduino Fiido 3.01";
 
 I2CScanner i2cScanner;
 Adafruit_MCP4725 dac;
