@@ -23,7 +23,7 @@ struct ConfigContainer {
 	boolean desacelera_al_parar_pedal = false;
 
 	// Rampa de desaceleración al parar los pedales.
-	// A mayor número, más rápido desacelera. Usar Múltiplos de 0.25.
+	// A mayor número, más rápido desacelera. 1 ó 2.
 	byte rampa_desaceleracion = 1;
 
 	// -------------- TONOS
