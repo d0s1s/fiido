@@ -83,6 +83,15 @@ PROGRESIVOS:
  * al volver a reanudar el pedaleo, la asistencia se iniciará desde 0
  * progresivamente hasta volver a alcanzar la velocidad anteriormente
  * fijada.
+ ------------------------------------------------------------------------
+AUTO_PROGRESIVOS:
+ * Si se deja de pedalear, el motor se para como de costumbre, pero si
+ * continuamos pedaleando antes de transcurridos 10 segundos no inciará
+ * el progresivo desde 0 si no que el motor continuará a una velocidad
+ * ligeramente inferior a la que íbamos.
+ * 
+ * Si se frena antes de los 10 segundos se anula la función y comenzará
+ * el progresivo desde cero.
 ------------------------------------------------------------------------
 ASISTENCIA A 6 KM/H DESDE PARADO:
  * Se puede accionar este modo mientras el botón esté accionado o

@@ -47,10 +47,18 @@ const int a0_valor_minimo = 329;
 const int a0_valor_6kmh = 440;
 const int a0_valor_limite = 842;
 
-// Variable para cálculos.
-int contador_retardo_aceleracion = 0;
-// Suavidad de los progresivos.
+// Variables para cálculos.
+float contador_retardo_aceleracion = 0;
+byte contador_retardo_inicio_progresivo = 0;
+float bkp_contador_retardo_aceleracion = 0;
+boolean auto_progresivo = false;
+
+// Variables para progresivos y auto_progresivos.
 const float fac_p = 1.056 - 0.056 * cnf.suavidad_progresivos;
+float fac_b = 0.0;
+float fac_a = 0.0;
+const float fac_c = cnf.suavidad_autoprogresivos / 10.0;
+
 // Almacena el último valor asignado al DAC.
 int nivel_aceleracion_prev = a0_valor_reposo;
 // Valor recogido del acelerador.
@@ -76,7 +84,9 @@ byte frenadas = 0;
 boolean freno = true;
 // Estado del botón. True -HIGH- Desactivado. False -LOW- Activado.
 boolean boton = true;
-// Con acelerador o sin acelerador.
+// Modo 6 Km/h sin pedalear.
+boolean asistencia6 = false;
+// Modo con acelerador o sin acelerador.
 boolean modo_acelerador = true;
 
 //======= Variables de interrupción ====================================
@@ -86,7 +96,7 @@ volatile unsigned long ultimo_evento_pas = millis();
 // Variable para la detección del pedaleo.
 volatile boolean pedaleo = false;
 // Variable donde se suman los pulsos del sensor PAS.
-volatile byte a_pulsos = 0;
+int a_pulsos = 0;
 // Variable donde se suman las frenadas.
 volatile byte a_frenadas = 0;
 // Medidas de tiempo para la señal Low-High del PAS.
@@ -124,21 +134,25 @@ void pedal() {
 	ultimo_evento_pas = millis();
 	int pas_factor = tiempo_pas_rising;
 
-	// Sólo consideramos pedaleo si estamos en Falling.
+	// Contamos pulsos.
 	if (!estado_pas)
 		a_pulsos++;
 
+	// Activamos pedaleo.
 	if (a_pulsos >= cnf.activa_pedaleo) {
-		// Activamos pedaleo.
 		pedaleo = true;
 		a_pulsos = 0;
 	} else {
-		// Si el ciclo de Rising tarda mucho.
-		if (pas_factor > 2000) {
-			// Evita pedaleo inverso.
-			a_pulsos = 0;
+		// Si Rising tarda mucho.
+		if (pas_factor > 1500) {
+			if (cnf.activa_pedaleo == 1) {
+				a_pulsos = -1;
+			} else {
+				a_pulsos = 0;
+			}
 		}
 	}
+
 }
 
 // --------- Freno
@@ -147,7 +161,10 @@ void frenar() {
 	// Comprobación para evitar lecturas fantasmas.
 	if (digitalRead(pin_freno) == LOW) {
 		a_frenadas++;
+		// Reiniciamos contadores.
+		contador_retardo_inicio_progresivo = cnf.retardo_inicio_progresivo;
 		contador_retardo_aceleracion = 0;
+		bkp_contador_retardo_aceleracion = 0;
 	}
 }
 
@@ -182,6 +199,18 @@ int calculaAceleradorProgresivoNoLineal() {
 	return constrain(nivel_aceleraciontmp, a0_valor_reposo, v_crucero);
 }
 
+// Progresivo no lineal 6 Km/h.
+int calculaAceleradorProgresivoNoLineal6() {
+	if (!modo_acelerador)
+		v_crucero = a0_valor_limite;
+
+	float fac_m = (v_crucero - a0_valor_reposo) / pow (cnf.retardo_aceleracion, fac_p);
+	int nivel_aceleraciontmp = (int) freno * (a0_valor_6kmh + fac_m * pow (contador_retardo_aceleracion, fac_p));
+
+	return constrain(nivel_aceleraciontmp, a0_valor_reposo, v_crucero);
+}
+
+// Verifica lectura del acelerador en el inicio.
 void validaAcelerador() {
 	if (leeAcelerador(30) < a0_valor_corte) {
 		repeatTones(pin_piezo, cnf.buzzer_activo, 1, 3100, 100, 0);
@@ -287,13 +316,30 @@ void setup() {
 
 		// Comprobamos si hay acelerador.
 		validaAcelerador();
+		
+		// Estabiliza valores.
+		cnf.retardo_aceleracion = constrain(cnf.retardo_aceleracion, 1, 10);
+		cnf.retardo_inicio_progresivo = constrain(cnf.retardo_inicio_progresivo, 1, 20);
 
 		// Ajusta configuración.
 		cnf.retardo_aceleracion = cnf.retardo_aceleracion * (1000 / cnf.tiempo_act);
+		cnf.retardo_inicio_progresivo = cnf.retardo_inicio_progresivo * (1000 / cnf.tiempo_act);
+		
+		// Anulamos el retardo por seguridad para que empiece progresivo suave al encender la bici.
+		contador_retardo_inicio_progresivo = cnf.retardo_inicio_progresivo;
+
+		// Cálculo de factores para auto_progresivo.
+		if (cnf.retardo_inicio_progresivo > 0) {
+				fac_b = (1.0 / cnf.retardo_aceleracion - 1.0) / (pow ((cnf.retardo_inicio_progresivo - 1.0), fac_c) - pow (1.0, fac_c));
+				fac_a = 1.0 - pow (1.0, fac_c) * fac_b;
+		}
+
 		// Estabiliza imanes.
 		cnf.activa_pedaleo = constrain(cnf.activa_pedaleo, 1, 6);
 		// Estabiliza suavidad de los progresivos.
 		cnf.suavidad_progresivos = constrain(cnf.suavidad_progresivos, 1, 10);
+		// Estabiliza suavidad de los auto_progresivos.
+		cnf.suavidad_autoprogresivos = constrain(cnf.suavidad_autoprogresivos, 1, 10);
 		// Estabiliza rampa de desaceleración.
 		cnf.rampa_desaceleracion = constrain(cnf.rampa_desaceleracion, 1, 2);
 		// Tono de finalización configuración del sistema.
@@ -334,16 +380,27 @@ void loop() {
 
 		// Si no se pedalea.
 		if (!pedaleo) {
-			// Asistencia 6 Km/h con acelerador.
-			if (modo_acelerador && cnf.asistencia_acelerador && v_acelerador > a0_valor_minimo) {
+			// Asistencia 6 Km/h con acelerador o con botón rojo.
+			if (modo_acelerador && cnf.asistencia_acelerador && v_acelerador > a0_valor_minimo || cnf.asistencia_pulsador && boton == 0) {
 				nivel_aceleracion = a0_valor_6kmh;
+				asistencia6 = true;
 			} else {
+				if (actualizacion_contadores)
+					contador_retardo_inicio_progresivo++;
+
+				if (contador_retardo_inicio_progresivo > cnf.retardo_inicio_progresivo)
+					contador_retardo_inicio_progresivo = cnf.retardo_inicio_progresivo;
+				
+				// Lanzamos auto_progresivo.
+				auto_progresivo = true;
+				
+				if (contador_retardo_aceleracion > 1) {
+					bkp_contador_retardo_aceleracion = contador_retardo_aceleracion;
+				}
+
 				// Desacelera al parar los pedales.
 				if (contador_retardo_aceleracion > 0 && cnf.desacelera_al_parar_pedal) {
 					contador_retardo_aceleracion = contador_retardo_aceleracion - cnf.rampa_desaceleracion;
-					nivel_aceleracion = calculaAceleradorProgresivoNoLineal();
-
-					// Calculamos el nivel de aceleración.
 					nivel_aceleracion = calculaAceleradorProgresivoNoLineal();
 
 					if (contador_retardo_aceleracion < 0) {
@@ -373,12 +430,26 @@ void loop() {
 				anulaCruceroAcelerador();
 
 			// Calculamos el nivel de aceleración.
-			nivel_aceleracion = calculaAceleradorProgresivoNoLineal();
-		}
+			if (asistencia6) {
+				nivel_aceleracion = calculaAceleradorProgresivoNoLineal6();
+				asistencia6 = false;
+			} else if (auto_progresivo && contador_retardo_inicio_progresivo < cnf.retardo_inicio_progresivo) {
+				if (bkp_contador_retardo_aceleracion > cnf.retardo_aceleracion) {
+					bkp_contador_retardo_aceleracion = cnf.retardo_aceleracion;
+				}
+				
+				contador_retardo_aceleracion = freno * bkp_contador_retardo_aceleracion * (fac_a + fac_b * pow (contador_retardo_inicio_progresivo, fac_c)) * v_crucero / a0_valor_limite;
 
-		// Si el botón está pulsado.
-		if (cnf.asistencia_pulsador && boton == 0) {
-			nivel_aceleracion = a0_valor_6kmh;
+				// Calculamos auto_progresivo.
+				nivel_aceleracion = calculaAceleradorProgresivoNoLineal();
+			} else {
+				nivel_aceleracion = calculaAceleradorProgresivoNoLineal();
+			}
+
+			// Quitamos auto_progresivo.
+			auto_progresivo = false;
+			// Reinicio de contador.
+			contador_retardo_inicio_progresivo = 0;
 		}
 
 		// Fijamos el acelerador si el valor anterior es distinto al actual.
