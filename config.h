@@ -14,13 +14,14 @@ struct ConfigContainer {
 	// -------------- PEDALEO
 
 	// Tiempo en ms para detectar la desactivación del pedaleo.
-	unsigned long tiempo_act = 750;
+	// Valores recomendados 500 ó 750.
+	unsigned long tiempo_act = 500;
 
 	// Número de imán a la que activamos pedaleo.
 	byte activa_pedaleo = 2;
 
 	// Desacelera al parar los pedales.
-	boolean desacelera_al_parar_pedal = false;
+	boolean desacelera_al_parar_pedal = true;
 
 	// Rampa de desaceleración al parar los pedales.
 	// A mayor número, más rápido desacelera. 1 ó 2.
