@@ -27,6 +27,10 @@ struct ConfigContainer {
 	// A mayor número, más rápido desacelera. 1 ó 2.
 	byte rampa_desaceleracion = 1;
 
+	// True si se desea forzar el modo sin acelerador. El acelerador
+	// se podría usar por ejemplo sólo para la asistencia 6 Km/h.
+	boolean modo_sinacelerador = false;
+
 	// -------------- TONOS
 
 	// Habilita los tonos de inicialización del sistema.

@@ -315,8 +315,13 @@ void setup() {
 		}
 
 		// Comprobamos si hay acelerador.
-		validaAcelerador();
-		
+		if (!cnf.modo_sinacelerador) {
+			validaAcelerador();
+		} else {
+			modo_acelerador = false;
+			repeatTones(pin_piezo, cnf.buzzer_activo, 3, 3100, 50, 50);
+		}
+
 		// Estabiliza valores.
 		cnf.retardo_aceleracion = constrain(cnf.retardo_aceleracion, 1, 10);
 		cnf.retardo_inicio_progresivo = constrain(cnf.retardo_inicio_progresivo, 1, 20);
@@ -324,14 +329,14 @@ void setup() {
 		// Ajusta configuración.
 		cnf.retardo_aceleracion = cnf.retardo_aceleracion * (1000 / cnf.tiempo_act);
 		cnf.retardo_inicio_progresivo = cnf.retardo_inicio_progresivo * (1000 / cnf.tiempo_act);
-		
+
 		// Anulamos el retardo por seguridad para que empiece progresivo suave al encender la bici.
 		contador_retardo_inicio_progresivo = cnf.retardo_inicio_progresivo;
 
 		// Cálculo de factores para auto_progresivo.
 		if (cnf.retardo_inicio_progresivo > 0) {
-				fac_b = (1.0 / cnf.retardo_aceleracion - 1.0) / (pow ((cnf.retardo_inicio_progresivo - 1.0), fac_c) - pow (1.0, fac_c));
-				fac_a = 1.0 - pow (1.0, fac_c) * fac_b;
+			fac_b = (1.0 / cnf.retardo_aceleracion - 1.0) / (pow ((cnf.retardo_inicio_progresivo - 1.0), fac_c) - pow (1.0, fac_c));
+			fac_a = 1.0 - pow (1.0, fac_c) * fac_b;
 		}
 
 		// Estabiliza imanes.
