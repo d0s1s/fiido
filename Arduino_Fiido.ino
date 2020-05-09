@@ -376,8 +376,7 @@ void loop() {
 		}
 
 		// Lectura de acelerador.
-		if (modo_acelerador)
-			v_acelerador = leeAcelerador(30);
+		v_acelerador = leeAcelerador(30);
 
 		// Lecturas de los sensores.
 		freno = digitalRead(pin_freno);
@@ -386,7 +385,7 @@ void loop() {
 		// Si no se pedalea.
 		if (!pedaleo) {
 			// Asistencia 6 Km/h con acelerador o con botón rojo.
-			if (modo_acelerador && cnf.asistencia_acelerador && v_acelerador > a0_valor_minimo || cnf.asistencia_pulsador && boton == 0) {
+			if (cnf.asistencia_acelerador && v_acelerador > a0_valor_minimo || cnf.asistencia_pulsador && boton == 0) {
 				nivel_aceleracion = a0_valor_6kmh;
 				asistencia6 = true;
 			} else {
