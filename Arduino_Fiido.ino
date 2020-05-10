@@ -453,8 +453,10 @@ void loop() {
 			}
 
 			// Modo sin acelerador --> Si pulsamos el botón o el acelerador mientras pedaleamos, damos ayuda 6 km/h.
-			if (!modo_acelerador && (cnf.asistencia_acelerador && v_acelerador > a0_valor_6kmh && !lectura_incorrecta_acelerador || cnf.asistencia_pulsador && boton == 0))
+			if (!modo_acelerador && (cnf.asistencia_acelerador && v_acelerador > a0_valor_6kmh && !lectura_incorrecta_acelerador || cnf.asistencia_pulsador && boton == 0)) {
 				nivel_aceleracion = a0_valor_6kmh;
+				asistencia6 = true;
+			}
 
 			// Quitamos auto_progresivo.
 			auto_progresivo = false;
